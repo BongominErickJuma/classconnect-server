@@ -1,0 +1,64 @@
+[
+  {
+    "_id": "5c8a6d1d0190b214360dh101",
+    "title": "John's Todo App Solution",
+    "body": "Implemented CRUD operations with React hooks and localStorage. Includes Jest tests for all components.",
+    "assignment": "5c8a4b1d0190b214360df101",
+    "student": "5c8a1d5b0190b214360dc057"
+  },
+  {
+    "_id": "5c8a6d1d0190b214360dh102",
+    "title": "Jane's Todo App",
+    "body": "Used useContext for state management. Added dark mode toggle feature.",
+    "assignment": "5c8a4b1d0190b214360df101",
+    "student": "5c8a1d5b214360dc058"
+  },
+
+  {
+    "_id": "5c8a6d1d0190b214360dh103",
+    "title": "Alice's Blog API",
+    "body": "Implemented JWT authentication. Swagger docs included at /api-docs.",
+    "assignment": "5c8a4b1d0190b214360df102",
+    "student": "5c8a1d5b0190b214360dc059"
+  },
+
+  {
+    "_id": "5c8a6d1d0190b214360dh104",
+    "title": "Bob's LED Blink Code",
+    "body": "Used GPIO pin 13. Demo video link: https://example.com/demo1",
+    "assignment": "5c8a4b1d0190b214360df103",
+    "student": "5c8a1d5b0190b214360dc060"
+  },
+
+  {
+    "_id": "5c8a6d1d0190b214360dh105",
+    "title": "Eva's Library Stories",
+    "body": "Prioritized checkout/return features for Sprint 1. Attached CSV with full backlog.",
+    "assignment": "5c8a4b1d0190b214360df105",
+    "student": "5c8a1d5b0190b214360dc061"
+  },
+
+  {
+    "_id": "5c8a6d1d0190b214360dh106",
+    "title": "Mike's Query Fixes",
+    "body": "Added composite indexes on user_id+created_at. Reduced query time from 2s to 50ms.",
+    "assignment": "5c8a4b1d0190b214360df107",
+    "student": "5c8a1d5b0190b214360dc062"
+  },
+
+  {
+    "_id": "5c8a6d1d0190b214360dh107",
+    "title": "Sarah's Serverless API",
+    "body": "Deployed with Terraform. Uses DynamoDB streams for real-time updates.",
+    "assignment": "5c8a4b1d0190b214360df109",
+    "student": "5c8a1d5b0190b214360dc063"
+  },
+
+  {
+    "_id": "5c8a6d1d0190b214360dh108",
+    "title": "Tom's Weather App",
+    "body": "Implemented location services and 5-day forecast. Used Bloc for state management.",
+    "assignment": "5c8a4b1d0190b214360df113",
+    "student": "5c8a1d5b0190b214360dc064"
+  }
+]

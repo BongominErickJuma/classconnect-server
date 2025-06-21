@@ -1,0 +1,71 @@
+[
+  {
+    "_id": "5c8a23450190b214360dd101",
+    "name": "Full-Stack Web Development",
+    "description": "Learn HTML, CSS, JavaScript, Node.js, and React to build modern web applications.",
+    "ratingsAverage": 4.7,
+    "ratingsQuantity": 18,
+    "teachers": ["5c8a1d5b0190b214360dc067", "5c8a1d5b0190b214360dc068"],
+    "level": "intermediate",
+    "tags": ["JavaScript", "React", "Node.js", "MERN Stack"]
+  },
+  {
+    "_id": "5c8a23450190b214360dd102",
+    "name": "Microprocessors & Embedded Systems",
+    "description": "Explore ARM architecture, embedded C, and real-time operating systems (RTOS).",
+    "ratingsAverage": 4.3,
+    "ratingsQuantity": 9,
+    "teachers": ["5c8a1d5b0190b214360dc069"],
+    "level": "advanced",
+    "tags": ["ARM", "Embedded C", "RTOS", "IoT"]
+  },
+  {
+    "_id": "5c8a23450190b214360dd103",
+    "name": "Software Engineering Principles",
+    "description": "Master Agile, SOLID principles, and CI/CD pipelines for scalable software development.",
+    "ratingsAverage": 4.6,
+    "ratingsQuantity": 15,
+    "teachers": ["5c8a1d5b0190b214360dc070", "5c8a1d5b0190b214360dc074"],
+    "level": "intermediate",
+    "tags": ["Agile", "Git", "DevOps", "Testing"]
+  },
+  {
+    "_id": "5c8a23450190b214360dd104",
+    "name": "Database Systems",
+    "description": "Design SQL/NoSQL databases, optimize queries, and implement ACID transactions.",
+    "ratingsAverage": 4.4,
+    "ratingsQuantity": 11,
+    "teachers": ["5c8a1d5b0190b214360dc071"],
+    "tags": ["PostgreSQL", "MongoDB", "Indexing", "ORM"]
+  },
+  {
+    "_id": "5c8a23450190b214360dd105",
+    "name": "Cloud Computing with AWS",
+    "description": "Deploy serverless apps using AWS Lambda, S3, and DynamoDB.",
+    "ratingsAverage": 4.8,
+    "ratingsQuantity": 20,
+    "teachers": ["5c8a1d5b0190b214360dc072", "5c8a1d5b0190b214360dc075"],
+    "level": "advanced",
+    "tags": ["AWS", "Serverless", "Terraform", "SaaS"]
+  },
+  {
+    "_id": "5c8a23450190b214360dd106",
+    "name": "Cybersecurity Fundamentals",
+    "description": "Understand encryption, penetration testing, and OWASP Top 10 vulnerabilities.",
+    "ratingsAverage": 4.5,
+    "ratingsQuantity": 14,
+    "teachers": ["5c8a1d5b0190b214360dc073"],
+    "level": "intermediate",
+    "tags": ["Cryptography", "Ethical Hacking", "Firewalls"]
+  },
+  {
+    "_id": "5c8a23450190b214360dd107",
+    "name": "Mobile App Development (Flutter)",
+    "description": "Build cross-platform apps with Flutter and Firebase backend integration.",
+    "ratingsAverage": 4.6,
+    "ratingsQuantity": 16,
+    "teachers": ["5c8a1d5b0190b214360dc068", "5c8a1d5b0190b214360dc076"],
+    "level": "beginner",
+    "tags": ["Dart", "Firebase", "UI/UX", "State Management"]
+  }
+]

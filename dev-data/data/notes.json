@@ -1,0 +1,92 @@
+[
+  {
+    "_id": "5c8a3a1d0190b214360de101",
+    "title": "React Hooks Cheat Sheet",
+    "body": "Comprehensive guide to useState, useEffect, and useContext hooks with examples.",
+    "course": "5c8a23450190b214360dd101"
+  },
+  {
+    "_id": "5c8a3a1d0190b214360de102",
+    "title": "RESTful API Best Practices",
+    "body": "How to design scalable REST APIs with Node.js and Express. Covers status codes, pagination, and error handling.",
+    "course": "5c8a23450190b214360dd101"
+  },
+
+  {
+    "_id": "5c8a3a1d0190b214360de103",
+    "title": "ARM Assembly Basics",
+    "body": "Introduction to ARM instruction set, registers, and memory addressing modes.",
+    "course": "5c8a23450190b214360dd102"
+  },
+  {
+    "_id": "5c8a3a1d0190b214360de104",
+    "title": "RTOS Scheduling Algorithms",
+    "body": "Comparison of Round Robin, Priority-Based, and Rate-Monotonic scheduling in FreeRTOS.",
+    "course": "5c8a23450190b214360dd102"
+  },
+
+  {
+    "_id": "5c8a3a1d0190b214360de105",
+    "title": "Agile Scrum Workflow",
+    "body": "Step-by-step breakdown of sprints, standups, and backlog grooming.",
+    "course": "5c8a23450190b214360dd103"
+  },
+  {
+    "_id": "5c8a3a1d0190b214360de106",
+    "title": "SOLID Principles Explained",
+    "body": "Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, Dependency Inversion with code snippets.",
+    "course": "5c8a23450190b214360dd103"
+  },
+
+  {
+    "_id": "5c8a3a1d0190b214360de107",
+    "title": "SQL Query Optimization",
+    "body": "Indexing strategies, EXPLAIN ANALYZE, and avoiding N+1 queries.",
+    "course": "5c8a23450190b214360dd104"
+  },
+  {
+    "_id": "5c8a3a1d0190b214360de108",
+    "title": "MongoDB Schema Design",
+    "body": "When to embed vs. reference documents, and transaction pitfalls.",
+    "course": "5c8a23450190b214360dd104"
+  },
+
+  {
+    "_id": "5c8a3a1d0190b214360de109",
+    "title": "AWS Lambda Cold Starts",
+    "body": "How to mitigate latency using provisioned concurrency and VPC configurations.",
+    "course": "5c8a23450190b214360dd105"
+  },
+  {
+    "_id": "5c8a3a1d0190b214360de110",
+    "title": "Terraform State Management",
+    "body": "Remote state storage, locking, and workspace isolation best practices.",
+    "course": "5c8a23450190b214360dd105"
+  },
+
+  {
+    "_id": "5c8a3a1d0190b214360de111",
+    "title": "OWASP Top 10 Mitigations",
+    "body": "Preventing SQLi, XSS, and CSRF attacks in web applications.",
+    "course": "5c8a23450190b214360dd106"
+  },
+  {
+    "_id": "5c8a3a1d0190b214360de112",
+    "title": "Password Hashing with bcrypt",
+    "body": "Why salts and work factors matter. Code examples in Node.js.",
+    "course": "5c8a23450190b214360dd106"
+  },
+
+  {
+    "_id": "5c8a3a1d0190b214360de113",
+    "title": "Flutter State Management (Provider vs. Bloc)",
+    "body": "Comparison of state management solutions with performance benchmarks.",
+    "course": "5c8a23450190b214360dd107"
+  },
+  {
+    "_id": "5c8a3a1d0190b214360de114",
+    "title": "Firebase Auth Integration",
+    "body": "Step-by-step guide for email/password and Google Sign-In in Flutter.",
+    "course": "5c8a23450190b214360dd107"
+  }
+]
