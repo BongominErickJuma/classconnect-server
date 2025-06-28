@@ -12,20 +12,21 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 -- =============================================
 -- TABLE: Users (Instructors, Students, Admins)
 -- =============================================
+
 CREATE TABLE users (
     user_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
-    password_hash TEXT NOT NULL,
-    role VARCHAR(20) NOT NULL CHECK (role IN ('instructor', 'student', 'admin')),
-    profile_photo TEXT,
+    password TEXT NOT NULL,
+    role VARCHAR(20) CHECK (role IN ('instructor', 'student', 'admin')) DEFAULT 'student',
+    profile_photo TEXT DEFAULT '/img/users/default.jpg',
     email_verified BOOLEAN DEFAULT FALSE,
     verification_token TEXT,
     reset_password_token TEXT,
     reset_token_expires TIMESTAMP WITH TIME ZONE,
     is_deleted BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    password_changed_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX idx_user_email ON users(email);
