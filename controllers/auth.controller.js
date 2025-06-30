@@ -1,76 +1,16 @@
-const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const { promisify } = require('util');
 const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
+const { promisify } = require('util');
 
 const db = require('../config/db');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
-const sendEmail = require('../utils/email');
-
-const signToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN,
-  });
-};
-
-const createSendToken = (res, user, statusCode) => {
-  const token = signToken(user.user_id);
-
-  const cookieOptions = {
-    expiresIn:
-      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000,
-    httpOnly: true,
-  };
-
-  if (process.env.NODE_ENV === 'production') {
-    cookieOptions.secure = true;
-  }
-  //   send cookies
-
-  res.cookie('ecl_Jwt', token, cookieOptions);
-
-  res.status(statusCode).json({
-    status: 'success',
-    token,
-    data: user,
-  });
-};
-
-const changedPassword = (passwordChangedAt, JWTTimestamp) => {
-  if (passwordChangedAt) {
-    const changedTimestamp = parseInt(passwordChangedAt.getTime() / 1000, 10);
-    console.log(JWTTimestamp, changedTimestamp);
-    return JWTTimestamp < changedTimestamp;
-  }
-  return false;
-};
-
-const generatePasswordResetToken = async (user) => {
-  // 1. Create random token
-  const resetToken = crypto.randomBytes(32).toString('hex');
-
-  const hashedToken = crypto
-    .createHash('sha256')
-    .update(resetToken)
-    .digest('hex');
-
-  // 3. Set expiration (10 minutes from now)
-  const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
-
-  // 4. Save to database
-  const query = {
-    text: `UPDATE users 
-           SET reset_password_token = $1, 
-               reset_token_expires = $2 
-           WHERE user_id = $3 RETURNING*`,
-    values: [hashedToken, expiresAt, user.user_id],
-  };
-
-  const result = await db.query(query);
-
-  return resetToken;
-};
+const createSendToken = require('../utils/createSendToken ');
+const changedPassword = require('../utils/changedPassword ');
+const generateEmailVerificationToken = require('../utils/generateEmailVerificationToken');
+const generatePasswordResetToken = require('../utils/generatePasswordResetToken');
+const sendUserEmail = require('../utils/sendUserEmail');
 
 // SIGN UP USERS
 
@@ -80,14 +20,39 @@ exports.signup = catchAsync(async (req, res, next) => {
   const hashedPassword = await bcrypt.hash(password, 12);
 
   const query = {
-    text: `INSERT INTO USERS (name, email, password) VALUES ($1, $2, $3) RETURNING user_id, name, email, role, profile_photo`,
+    text: `INSERT INTO users 
+           (name, email, password) 
+           VALUES ($1, $2, $3) 
+           RETURNING user_id, name, email, role, profile_photo`,
     values: [name, email, hashedPassword],
   };
 
   const result = await db.query(query);
   const newUser = result.rows[0];
 
-  createSendToken(res, newUser, 201);
+  // Generate and send verification token
+  const verificationToken = await generateEmailVerificationToken(newUser);
+
+  const verifyURL = `${req.protocol}://${req.get(
+    'host'
+  )}/api/v1/auth/verify-email/${verificationToken}`;
+  const subject = 'Verify your email address';
+  const message = `Please click the following link to verify your email: ${verifyURL}\nThis link is valid for 24 hours.`;
+
+  await sendUserEmail({
+    email: newUser.email,
+    subject,
+    message,
+    tokenField: 'verification_token',
+    expiresField: 'verification_token_expires', // Make sure this column exists
+    userId: newUser.user_id,
+    db,
+  });
+
+  res.status(200).json({
+    status: 'success',
+    message: 'Verification email sent. Please check your inbox.',
+  });
 });
 
 // LOGIN USERS
@@ -100,9 +65,11 @@ exports.login = catchAsync(async (req, res, next) => {
     return next(new AppError('Please provide email and password', 400));
   }
 
-  // 2. Get user from database (including password)
+  // 2. Get user from database (including password and verification status)
   const query = {
-    text: `SELECT user_id, name, email, role, profile_photo, password, email_verified FROM users WHERE email = $1 AND is_deleted = FALSE`,
+    text: `SELECT user_id, name, email, role, profile_photo, password, email_verified 
+           FROM users 
+           WHERE email = $1 AND is_deleted = FALSE`,
     values: [email],
   };
 
@@ -114,8 +81,20 @@ exports.login = catchAsync(async (req, res, next) => {
     return next(new AppError('Incorrect email or password', 401));
   }
 
+  // 4. Check if email is verified
+  if (!user.email_verified) {
+    return next(
+      new AppError(
+        'Please verify your email first. Check your inbox for the verification link.',
+        401
+      )
+    );
+  }
+
+  // Remove password from the user object
   user.password = undefined;
-  // 4. If everything is OK, send token
+
+  // 5. If everything is OK, send token
   createSendToken(res, user, 200);
 });
 
@@ -186,7 +165,6 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   const user = result.rows[0];
 
   if (!user) {
-    // Don't reveal if user doesn't exist (security best practice)
     return res.status(200).json({
       status: 'success',
       message: 'If the email exists, a reset token has been sent',
@@ -197,37 +175,26 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   const resetToken = await generatePasswordResetToken(user);
 
   // 3. Send email
-  try {
-    const resetURL = `${req.protocol}://${req.get(
-      'host'
-    )}/api/v1/auth/reset-password/${resetToken}`;
+  const resetURL = `${req.protocol}://${req.get(
+    'host'
+  )}/api/v1/auth/reset-password/${resetToken}`;
+  const subject = 'Your password reset token (valid for 10 minutes)';
+  const message = `Forgot your password? Submit a PATCH request with your new password to: ${resetURL}\nIf you didn't forget your password, please ignore this email.`;
 
-    await sendEmail({
-      email: user.email,
-      subject: 'Your password reset token (valid for 10 minutes)',
-      message: `Forgot your password? Submit a PATCH request with your new password to: ${resetURL}\nIf you didn't forget your password, please ignore this email.`,
-    });
+  await sendUserEmail({
+    email: user.email,
+    subject,
+    message,
+    tokenField: 'reset_password_token',
+    expiresField: 'reset_token_expires',
+    userId: user.user_id,
+  });
 
-    res.status(200).json({
-      status: 'success',
-      message: 'Token sent to email',
-    });
-  } catch (err) {
-    // Clear the reset token if email fails
-    await db.query(
-      `UPDATE users SET reset_password_token = NULL, reset_token_expires = NULL WHERE user_id = $1`,
-      [user.user_id]
-    );
-
-    return next(
-      new AppError(
-        'There was an error sending the email. Try again later!',
-        500
-      )
-    );
-  }
+  res.status(200).json({
+    status: 'success',
+    message: 'Token sent to email',
+  });
 });
-
 // RESET PASSWORD
 
 exports.resetPassword = catchAsync(async (req, res, next) => {
@@ -311,4 +278,49 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
 
   // 4. Send new token
   createSendToken(res, updatedUser.rows[0], 200);
+});
+
+// Verify Email
+
+exports.verifyEmail = catchAsync(async (req, res, next) => {
+  // 1. Get and hash token
+  const verificationToken = req.params.token;
+  const hashedToken = crypto
+    .createHash('sha256')
+    .update(verificationToken)
+    .digest('hex');
+
+  // 2. Find unverified user with valid token
+  const query = {
+    text: `SELECT * FROM users 
+           WHERE verification_token = $1 
+           AND email_verified = FALSE 
+           AND verification_token_expires > NOW()
+           AND is_deleted = FALSE`,
+    values: [hashedToken],
+  };
+
+  const result = await db.query(query);
+  const user = result.rows[0];
+
+  if (!user) {
+    return next(new AppError('Token is invalid or has expired', 400));
+  }
+
+  // 3. Mark as verified and clear token
+  const updateQuery = {
+    text: `UPDATE users 
+           SET email_verified = TRUE, 
+               verification_token = NULL,
+               verification_token_expires = NULL
+           WHERE user_id = $1 
+           RETURNING user_id, name, email, role, profile_photo`,
+    values: [user.user_id],
+  };
+
+  const updateResult = await db.query(updateQuery);
+  const verifiedUser = updateResult.rows[0];
+
+  // 4. NOW issue the JWT token
+  createSendToken(res, verifiedUser, 200);
 });

@@ -22,6 +22,7 @@ CREATE TABLE users (
     profile_photo TEXT DEFAULT '/img/users/default.jpg',
     email_verified BOOLEAN DEFAULT FALSE,
     verification_token TEXT,
+    verification_token_expires TIMESTAMP WITH TIME ZONE,
     reset_password_token TEXT,
     reset_token_expires TIMESTAMP WITH TIME ZONE,
     is_deleted BOOLEAN DEFAULT FALSE,
