@@ -27,8 +27,8 @@ router.use('/:course_id/ratings', ratingsRouter);
 
 // COURSE ENROLMENTS
 
-router.use('/enrolments', enrolmentsRouter);
-router.use('/:course_id/enrolments', enrolmentsRouter);
+router.use('/enrollments', enrolmentsRouter);
+router.use('/:course_id/enrollments', enrolmentsRouter);
 
 // COURSE ROUTES
 

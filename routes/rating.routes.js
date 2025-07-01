@@ -4,7 +4,7 @@ const authController = require('../controllers/auth.controller');
 
 const router = express.Router({ mergeParams: true });
 
-router(
+router.use(
   '/delete-permanently',
   authController.restrictTo('admin'),
   ratingsController.deleteRating

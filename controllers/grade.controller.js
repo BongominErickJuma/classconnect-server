@@ -32,7 +32,7 @@ exports.updateGrade = catchAsync(async (req, res, next) => {
             SET 
                 score = COALESCE($1, score),
                 feedback = COALESCE($2, feedback)
-            WHERE submission_id = $3
+            WHERE grade_id = $3
             RETURNING *
     `,
     values: [score, feedback, req.params.id],

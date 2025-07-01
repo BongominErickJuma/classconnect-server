@@ -7,6 +7,7 @@ exports.getAll = (model) =>
     const query = {
       text: `SELECT * FROM ${model}`,
     };
+
     const results = await db.query(query);
     const output = results.rows;
 

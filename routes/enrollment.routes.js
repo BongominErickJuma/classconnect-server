@@ -4,20 +4,20 @@ const authController = require('../controllers/auth.controller');
 
 const router = express.Router({ mergeParams: true });
 
-router(
-  '/delete-permanently',
+router.use(
+  '/delete-permanently/:id',
   authController.restrictTo('admin'),
-  enrolmentController.deleteEnrolment
+  enrolmentController.deleteEnrollment
 );
 
 router
   .route('/')
-  .get(enrolmentController.getAllEnrolments)
+  .get(enrolmentController.getAllEnrollments)
   .post(
     authController.restrictTo('student'),
-    enrolmentController.createEnrolment
+    enrolmentController.createEnrollment
   );
 
-router.route('/:id').get(enrolmentController.getEnrolment);
+router.route('/:id').get(enrolmentController.getEnrollment);
 
 module.exports = router;

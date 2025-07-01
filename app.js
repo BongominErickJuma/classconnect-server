@@ -12,7 +12,7 @@ app.use(express.json());
 
 app.use('/api/v1/ecl/users', userRouter);
 app.use('/api/v1/ecl/courses', courseRouter);
-app.use('/api/v1/notifications', notificationRouter);
+app.use('/api/v1/ecl/notifications', notificationRouter);
 
 app.all('/{*any}', (req, res, next) => {
   next(

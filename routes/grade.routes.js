@@ -4,8 +4,8 @@ const authController = require('../controllers/auth.controller');
 
 const router = express.Router({ mergeParams: true });
 
-router(
-  '/delete-permanently',
+router.use(
+  '/delete-permanently/:id',
   authController.restrictTo('admin', 'instructer'),
   gradesController.deleteGrade
 );

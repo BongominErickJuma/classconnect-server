@@ -12,7 +12,9 @@ exports.createSubmission = catchAsync(async (req, res, next) => {
 
   const query = {
     text: `INSERT INTO submissions (assignment_id, student_id, submitted_file)
-            VALUES ($1, $2, $3) RETURNING *`,
+            VALUES ($1, $2, $3)
+            ON CONFLICT (assignment_id, student_id) DO NOTHING RETURNING *
+            `,
     values: [req.params.assignment_id, student_id, submitted_file],
   };
 

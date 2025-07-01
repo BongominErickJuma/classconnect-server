@@ -1,7 +1,7 @@
 const express = require('express');
 const userController = require('./../controllers/user.controller');
 const authController = require('./../controllers/auth.controller');
-const gradeRouter = require(gradeRouter);
+const gradeRouter = require('./grade.routes');
 
 const router = express.Router();
 
@@ -18,7 +18,7 @@ router.use(authController.protect);
 // GRADES ROUTES
 
 router.use('/grades', gradeRouter);
-router.use('/:user_id/grades', gradeRouter);
+router.use('/:submission_id/grades', gradeRouter);
 
 // USER ROUTES
 

@@ -2,24 +2,24 @@ const catchAsync = require('./../utils/catchAsync');
 const db = require('../config/db');
 const globalController = require('./global.controller');
 
-exports.getAllEnrolments = globalController.getAll('enrolments');
-exports.getEnrolment = globalController.getOne('enrolment');
-exports.deleteEnrolment = globalController.deleteOne('enrolment');
+exports.getAllEnrollments = globalController.getAll('enrollments');
+exports.getEnrollment = globalController.getOne('enrollment');
+exports.deleteEnrollment = globalController.deleteOne('enrollment');
 
-exports.createEnrolment = catchAsync(async (req, res, next) => {
-  const { user_id } = req.body;
+exports.createEnrollment = catchAsync(async (req, res, next) => {
+  const { student_id } = req.body;
 
   const query = {
-    text: `INSERT INTO enrolments (user_id, course_id)
-            VALUES ($1, $2) RETURNING *`,
-    values: [user_id, req.params.course_id],
+    text: `INSERT INTO enrollments (student_id, course_id) VALUES ($1, $2) RETURNING *`,
+    values: [student_id, req.params.course_id],
   };
 
+  console.log(query);
   const results = await db.query(query);
-  const enrolment = results.rows[0];
+  const enrollment = results.rows[0];
 
   res.status(201).json({
     status: 'success',
-    data: enrolment,
+    data: enrollment,
   });
 });
