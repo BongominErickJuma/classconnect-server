@@ -4,6 +4,7 @@ const AppError = require('./utils/appError');
 
 const userRouter = require('./routes/user.routes');
 const courseRouter = require('./routes/course.routes');
+const notificationRouter = require('./routes/notification.routes');
 
 const app = express();
 
@@ -11,6 +12,7 @@ app.use(express.json());
 
 app.use('/api/v1/ecl/users', userRouter);
 app.use('/api/v1/ecl/courses', courseRouter);
+app.use('/api/v1/notifications', notificationRouter);
 
 app.all('/{*any}', (req, res, next) => {
   next(

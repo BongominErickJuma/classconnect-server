@@ -1,8 +1,14 @@
 const express = require('express');
 const assignmentController = require('../controllers/assignment.controller');
 const authController = require('../controllers/auth.controller');
+const submissionRouter = require('./submission.routes');
 
 const router = express.Router({ mergeParams: true });
+
+// ASSIGNMENT SUBMISSIONS
+
+router.use('/submissions', submissionRouter);
+router.use('/:assignment_id/submissions', submissionRouter);
 
 router.delete(
   '/delete-permanently/:id',

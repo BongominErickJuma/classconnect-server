@@ -1,6 +1,7 @@
 const express = require('express');
 const userController = require('./../controllers/user.controller');
 const authController = require('./../controllers/auth.controller');
+const gradeRouter = require(gradeRouter);
 
 const router = express.Router();
 
@@ -13,6 +14,13 @@ router.patch('/verify-email/:token', authController.verifyEmail);
 //
 
 router.use(authController.protect);
+
+// GRADES ROUTES
+
+router.use('/grades', gradeRouter);
+router.use('/:user_id/grades', gradeRouter);
+
+// USER ROUTES
 
 router.patch('/updatePassword', authController.updatePassword);
 router.patch('/updateMe', userController.updateMe);
