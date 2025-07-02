@@ -12,7 +12,7 @@ const app = express();
 
 const allowedOrigins = [
   'http://localhost:5173',
-  'https://eclassconnect.netlify.app/',
+  'https://eclassconnect.netlify.app',
 ];
 
 app.use(
