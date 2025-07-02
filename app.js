@@ -10,8 +10,22 @@ const notificationRouter = require('./routes/notification.routes');
 
 const app = express();
 
-app.use(cors());
-app.options('{*any}', cors());
+const allowedOrigins = ['http://localhost:5173'];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like curl or postman)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        return callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true,
+  })
+);
 
 app.set('query parser', 'extended');
 
