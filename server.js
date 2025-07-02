@@ -3,7 +3,7 @@ env.config({ path: './config.env' });
 
 const app = require('./app');
 
-const PORT = process.env.port;
+const PORT = process.env.port || 8000;
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
