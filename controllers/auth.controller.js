@@ -38,10 +38,11 @@ exports.signup = catchAsync(async (req, res, next) => {
   )}/api/v1/ecl/users/verify-email/${verificationToken}`;
 
   await sendUserEmail({
-    newUser,
-    verifyURL,
+    user: newUser,
+    url: verifyURL,
     tokenField: 'verification_token',
     expiresField: 'verification_token_expires',
+    emailType: 'emailVerification',
   });
   res.status(200).json({
     status: 'success',
@@ -173,21 +174,19 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   const resetURL = `${req.protocol}://${req.get(
     'host'
   )}/api/v1/auth/reset-password/${resetToken}`;
-  const subject = 'Your password reset token (valid for 10 minutes)';
-  const message = `Forgot your password? Submit a PATCH request with your new password to: ${resetURL}\nIf you didn't forget your password, please ignore this email.`;
 
   await sendUserEmail({
-    email: user.email,
-    subject,
-    message,
+    user: newUser,
+    url: resetURL,
     tokenField: 'reset_password_token',
     expiresField: 'reset_token_expires',
-    userId: user.user_id,
+    emailType: 'passwordReset',
   });
 
   res.status(200).json({
     status: 'success',
-    message: 'Token sent to email',
+    message:
+      'Token sent! Please check your inbox. If you don’t see it, check your spam or junk folder.',
   });
 });
 // RESET PASSWORD
@@ -315,6 +314,19 @@ exports.verifyEmail = catchAsync(async (req, res, next) => {
 
   const updateResult = await db.query(updateQuery);
   const verifiedUser = updateResult.rows[0];
+
+  // 3. Send email
+  const updatePhotoURL = `${req.protocol}://${req.get(
+    'host'
+  )}/api/v1/ecl/users/updateMe`;
+
+  await sendUserEmail({
+    user: verifiedUser,
+    url: updatePhotoURL,
+    tokenField: 'verification_token',
+    expiresField: 'verification_token_expires',
+    emailType: 'welcomeUser',
+  });
 
   // 4. NOW issue the JWT token
   createSendToken(res, verifiedUser, 200);
