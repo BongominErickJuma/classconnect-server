@@ -10,12 +10,6 @@ const db = new pg.Client({
 });
 
 // 👇 Set the schema AFTER connecting
-db.connect((err) => {
-  if (err) throw err;
-  db.query('SET search_path TO eclasslink, public;', (err) => {
-    if (err) throw err;
-    console.log('Search path set to eclasslink');
-  });
-});
+db.connect();
 
 module.exports = db;
