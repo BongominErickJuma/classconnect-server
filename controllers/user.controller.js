@@ -1,5 +1,6 @@
 const db = require('./../config/db');
 const catchAsync = require('./../utils/catchAsync');
+const globalController = require('./global.controller');
 
 const filterObj = (obj, ...allowedFields) => {
   const newObject = {};
@@ -11,23 +12,8 @@ const filterObj = (obj, ...allowedFields) => {
   return newObject;
 };
 
-exports.getAllUsers = catchAsync(async (req, res, next) => {
-  // Define the fields you want to fetch
-  const userFields = ['user_id', 'name', 'email', 'role', 'profile_photo'];
-
-  // Construct the SQL query dynamically (prevents SQL injection)
-  const query = {
-    text: `SELECT ${userFields.join(', ')} FROM users WHERE is_deleted = FALSE`,
-  };
-
-  // Execute the query
-  const users = await db.query(query);
-
-  res.status(200).json({
-    status: 'success',
-    result: users.rows.length,
-    data: users.rows, // Send only the rows (not the full query result)
-  });
+exports.getAllUsers = globalController.getAll('users', {
+  fields: ['user_id', 'name', 'email', 'role', 'profile_photo'],
 });
 
 // GET MY DETAILS

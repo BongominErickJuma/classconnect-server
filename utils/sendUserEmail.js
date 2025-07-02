@@ -1,30 +1,17 @@
-const sendEmail = require('./email');
+const Email = require('./email');
 const db = require('../config/db');
 
 module.exports = async (options) => {
-  const {
-    email,
-    subject,
-    message,
-    tokenField = null,
-    expiresField = null,
-    userId = null,
-  } = options;
+  const { newUser, verifyURL, tokenField, expiresField } = options;
 
   try {
-    await sendEmail({
-      email,
-      subject,
-      message,
-    });
-
-    return { status: 'success', message: 'Token sent to email' };
+    await new Email(newUser, verifyURL).sendEmailVerification();
   } catch (err) {
     // Clear the token fields if provided
-    if (tokenField && expiresField && userId) {
+    if (tokenField && expiresField && user.user_id) {
       await db.query(
         `UPDATE users SET ${tokenField} = NULL, ${expiresField} = NULL WHERE user_id = $1`,
-        [userId]
+        [user.user_id]
       );
     }
 

@@ -8,6 +8,8 @@ const notificationRouter = require('./routes/notification.routes');
 
 const app = express();
 
+app.set('query parser', 'extended');
+
 app.use(express.json());
 
 app.use('/api/v1/ecl/users', userRouter);

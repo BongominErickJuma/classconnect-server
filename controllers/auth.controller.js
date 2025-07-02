@@ -35,23 +35,18 @@ exports.signup = catchAsync(async (req, res, next) => {
 
   const verifyURL = `${req.protocol}://${req.get(
     'host'
-  )}/api/v1/auth/verify-email/${verificationToken}`;
-  const subject = 'Verify your email address';
-  const message = `Please click the following link to verify your email: ${verifyURL}\nThis link is valid for 24 hours.`;
+  )}/api/v1/ecl/users/verify-email/${verificationToken}`;
 
   await sendUserEmail({
-    email: newUser.email,
-    subject,
-    message,
+    newUser,
+    verifyURL,
     tokenField: 'verification_token',
-    expiresField: 'verification_token_expires', // Make sure this column exists
-    userId: newUser.user_id,
-    db,
+    expiresField: 'verification_token_expires',
   });
-
   res.status(200).json({
     status: 'success',
-    message: 'Verification email sent. Please check your inbox.',
+    message:
+      'Verification email sent! Please check your inbox. If you don’t see it, check your spam or junk folder.',
   });
 });
 
