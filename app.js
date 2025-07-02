@@ -10,7 +10,10 @@ const notificationRouter = require('./routes/notification.routes');
 
 const app = express();
 
-const allowedOrigins = ['http://localhost:5173'];
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://eclassconnect.netlify.app/',
+];
 
 app.use(
   cors({
