@@ -41,6 +41,7 @@ CREATE TABLE courses (
     description TEXT,
     instructor_id UUID NOT NULL REFERENCES users(user_id),
     cover_image TEXT DEFAULT '/img/courses/default.jpg',
+    rating NUMERIC(4,2) DEFAULT 4.5,
     is_deleted BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
@@ -55,7 +56,7 @@ CREATE TABLE enrollments (
     enrollment_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     student_id UUID NOT NULL REFERENCES users(user_id),
     course_id UUID NOT NULL REFERENCES courses(course_id),
-    enrolled_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (student_id, course_id)
 );
 
@@ -87,7 +88,7 @@ CREATE TABLE submissions (
     assignment_id UUID NOT NULL REFERENCES assignments(assignment_id),
     student_id UUID NOT NULL REFERENCES users(user_id),
     submitted_file TEXT,
-    submitted_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (assignment_id, student_id)
 );
 
@@ -103,7 +104,7 @@ CREATE TABLE grades (
     score NUMERIC(5, 2),
     feedback TEXT,
     graded_by UUID NOT NULL REFERENCES users(user_id),
-    graded_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
 );
 
 CREATE INDEX idx_grade_submission ON grades(submission_id);
@@ -118,7 +119,7 @@ CREATE TABLE resources (
     type VARCHAR(20) CHECK (type IN ('pdf', 'video', 'link', 'document')),
     file_url TEXT,
     is_deleted BOOLEAN DEFAULT FALSE,
-    uploaded_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -144,6 +145,6 @@ CREATE TABLE ratings (
     student_id UUID NOT NULL REFERENCES users(user_id),
     rating INT CHECK (rating BETWEEN 1 AND 5),
     review TEXT,
-    rated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (course_id, student_id)
 );
