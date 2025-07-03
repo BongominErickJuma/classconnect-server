@@ -33,9 +33,12 @@ exports.signup = catchAsync(async (req, res, next) => {
   // Generate and send verification token
   const verificationToken = await generateEmailVerificationToken(newUser);
 
-  const verifyURL = `${req.protocol}://${req.get(
-    'host'
-  )}/api/v1/ecl/users/verify-email/${verificationToken}`;
+  let verifyURL = '';
+  if (process.env.NODE_ENV === 'production') {
+    verifyURL = `https://eclassconnect.netlify.app/verify-email?token=${verificationToken}`;
+  } else {
+    verifyURL = `http://localhost:5173/verify-email?token=${verificationToken}`;
+  }
 
   await sendUserEmail({
     user: newUser,
@@ -171,12 +174,15 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   const resetToken = await generatePasswordResetToken(user);
 
   // 3. Send email
-  const resetURL = `${req.protocol}://${req.get(
-    'host'
-  )}/api/v1/auth/reset-password/${resetToken}`;
+  let resetURL = '';
+  if (process.env.NODE_ENV === 'production') {
+    resetURL = `https://eclassconnect.netlify.app/reset-password?token=${resetToken}`;
+  } else {
+    resetURL = `http://localhost:5173/reset-password?token=${resetToken}`;
+  }
 
   await sendUserEmail({
-    user: newUser,
+    user,
     url: resetURL,
     tokenField: 'reset_password_token',
     expiresField: 'reset_token_expires',
@@ -316,9 +322,13 @@ exports.verifyEmail = catchAsync(async (req, res, next) => {
   const verifiedUser = updateResult.rows[0];
 
   // 3. Send email
-  const updatePhotoURL = `${req.protocol}://${req.get(
-    'host'
-  )}/api/v1/ecl/users/updateMe`;
+  const updatePhotoURL = '';
+
+  if (process.env.NODE_ENV === 'production') {
+    updatePhotoURL = `https://eclassconnect.netlify.app/login`;
+  } else {
+    updatePhotoURL = `http://localhost:5173/login`;
+  }
 
   await sendUserEmail({
     user: verifiedUser,
