@@ -322,7 +322,7 @@ exports.verifyEmail = catchAsync(async (req, res, next) => {
   const verifiedUser = updateResult.rows[0];
 
   // 3. Send email
-  const updatePhotoURL = '';
+  let updatePhotoURL = '';
 
   if (process.env.NODE_ENV === 'production') {
     updatePhotoURL = `https://eclassconnect.netlify.app/login`;
