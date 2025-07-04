@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
+const path = require('path');
 
 const globalErrorHandler = require('./controllers/error.controller');
 const AppError = require('./utils/appError');
@@ -34,6 +35,7 @@ app.set('query parser', 'extended');
 
 app.use(express.json());
 app.use(cookieParser());
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/api/v1/ecl/users', userRouter);
 app.use('/api/v1/ecl/courses', courseRouter);
