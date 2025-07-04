@@ -11,7 +11,7 @@ module.exports = async (user) => {
     .digest('hex');
 
   // 3. Set expiration (10 minutes from now)
-  const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
   // 4. Save to database
   const query = {
