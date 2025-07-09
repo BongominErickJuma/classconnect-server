@@ -15,6 +15,7 @@ router
   .get(resourceController.getAllResources)
   .post(
     authController.restrictTo('admin', 'instructor'),
+    resourceController.uploadResource,
     resourceController.createResource
   );
 
@@ -23,6 +24,7 @@ router
   .get(resourceController.getResurce)
   .patch(
     authController.restrictTo('admin', 'instructor'),
+    resourceController.uploadResource,
     resourceController.updateResource
   )
   .delete(

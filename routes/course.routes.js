@@ -38,6 +38,11 @@ router.delete(
   courseController.deleteCourse
 );
 
+router.get(
+  '/enrolled-courses/:ids',
+  courseController.getStudentEnrolledCourses
+);
+
 router
   .route('/')
   .get(courseController.getAllCourses)
@@ -51,6 +56,8 @@ router
   .get(courseController.getCourse)
   .patch(
     authController.restrictTo('admin', 'instructor'),
+    courseController.uploadCourseCover,
+    courseController.resizeCoverImage,
     courseController.updateCourse
   )
   .delete(

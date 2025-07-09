@@ -12,10 +12,7 @@ router.use(
 
 router
   .route('/')
-  .get(
-    authController.restrictTo('admin', 'instructor'),
-    submissionController.getAllSubmissions
-  )
+  .get(submissionController.getAllSubmissions)
   .post(
     authController.restrictTo('student'),
     submissionController.createSubmission

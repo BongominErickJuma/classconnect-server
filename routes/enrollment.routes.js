@@ -6,7 +6,7 @@ const router = express.Router({ mergeParams: true });
 
 router.use(
   '/delete-permanently/:id',
-  authController.restrictTo('admin'),
+  authController.restrictTo('admin', 'student'),
   enrolmentController.deleteEnrollment
 );
 

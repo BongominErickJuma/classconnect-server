@@ -38,7 +38,7 @@ exports.updateAssignment = catchAsync(async (req, res, next) => {
             WHERE assignment_id = $5
             RETURNING *
     `,
-    values: [title, description, due_date, max_score, req.params.id],
+    values: [title, due_date, description, max_score, req.params.id],
   };
   const results = await db.query(query);
   const assignment = results.rows[0];

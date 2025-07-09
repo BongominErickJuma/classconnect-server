@@ -1,16 +1,47 @@
+const multer = require('multer');
+const sharp = require('sharp');
+const validator = require('validator');
+
 const db = require('./../config/db');
 const catchAsync = require('./../utils/catchAsync');
 const globalController = require('./global.controller');
+const AppError = require('../utils/appError');
 
-const filterObj = (obj, ...allowedFields) => {
-  const newObject = {};
-  Object.keys(obj).forEach((el) => {
-    if (allowedFields.includes(el)) {
-      newObject[el] = obj[el];
-    }
-  });
-  return newObject;
+const multerStorage = multer.memoryStorage();
+
+// Connfigure Multer filter
+
+const multerFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith('image')) {
+    cb(null, true);
+  } else {
+    cb(new AppError('Not an Image, please upload only images', 400), false);
+  }
 };
+
+// upload file
+
+const upload = multer({
+  storage: multerStorage,
+  fileFilter: multerFilter,
+});
+
+exports.uploadProfilePhoto = upload.single('profile_photo');
+
+// image processing with sharp package
+exports.resizeUserPhoto = catchAsync(async (req, res, next) => {
+  if (!req.file) return next();
+
+  req.file.filename = `user-${req.user.user_id}-${Date.now()}.jpeg`;
+
+  await sharp(req.file.buffer)
+    .resize(500, 500)
+    .toFormat('jpeg')
+    .jpeg({ quality: 90 })
+    .toFile(`public/img/users/${req.file.filename}`);
+
+  next();
+});
 
 exports.getAllUsers = globalController.getAll('users', {
   fields: ['user_id', 'name', 'email', 'role', 'profile_photo'],
@@ -140,6 +171,16 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
   });
 });
 
+const filterObj = (obj, ...allowedFields) => {
+  const newObject = {};
+  Object.keys(obj).forEach((el) => {
+    if (allowedFields.includes(el)) {
+      newObject[el] = obj[el];
+    }
+  });
+  return newObject;
+};
+
 exports.updateMe = catchAsync(async (req, res, next) => {
   // 1. Prevent password updates through this route
   if (req.body.password || req.body.passwordConfirm) {
@@ -149,6 +190,14 @@ exports.updateMe = catchAsync(async (req, res, next) => {
         400
       )
     );
+  }
+
+  if (req.body.email && !validator.isEmail(req.body.email)) {
+    return next(new AppError('Invalid email format', 400));
+  }
+
+  if (req.body.name && req.body.name.trim().length < 5) {
+    return next(new AppError('Name must be at least 5 characters long', 400));
   }
 
   // 2. Filter only allowed fields to update
