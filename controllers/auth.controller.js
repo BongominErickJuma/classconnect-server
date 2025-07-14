@@ -97,6 +97,17 @@ exports.login = catchAsync(async (req, res, next) => {
   createSendToken(res, user, 200);
 });
 
+// LOGOUT USER
+
+exports.logout = (req, res) => {
+  res.cookie('ecl_Jwt', 'loggedOut', {
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
+  });
+};
+
 // PROTECT ROUTES
 
 exports.protect = catchAsync(async (req, res, next) => {

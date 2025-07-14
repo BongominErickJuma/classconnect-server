@@ -7,6 +7,7 @@ const router = express.Router();
 
 router.post('/signup', authController.signup);
 router.post('/login', authController.login);
+router.get('/logout', authController.logout);
 router.post('/forgotPassword', authController.forgotPassword);
 router.patch('/resetPassword/:token', authController.resetPassword);
 router.patch('/verify-email/:token', authController.verifyEmail);
@@ -19,7 +20,6 @@ router.use(authController.protect);
 
 router.use('/grades', gradeRouter);
 router.use('/:submission_id/grades', gradeRouter);
-
 // USER ROUTES
 
 router.patch('/updatePassword', authController.updatePassword);
