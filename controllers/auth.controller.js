@@ -106,6 +106,11 @@ exports.logout = (req, res) => {
     secure: process.env.NODE_ENV === 'production',
     sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
   });
+
+  res.status(200).json({
+    status: 'succes',
+    message: 'Logout successfull',
+  });
 };
 
 // PROTECT ROUTES

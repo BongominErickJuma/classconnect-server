@@ -4,12 +4,6 @@ const authController = require('../controllers/auth.controller');
 
 const router = express.Router({ mergeParams: true });
 
-router.use(
-  '/delete-permanently',
-  authController.restrictTo('admin'),
-  ratingsController.deleteRating
-);
-
 router
   .route('/')
   .get(ratingsController.getAllRatings)
@@ -19,9 +13,6 @@ router
   .route('/:id')
   .get(ratingsController.getRating)
   .patch(authController.restrictTo('student'), ratingsController.updateRating)
-  .delete(
-    authController.restrictTo('admin', 'student'),
-    ratingsController.trashRating
-  );
+  .delete(authController.restrictTo('student'), ratingsController.deleteRating);
 
 module.exports = router;

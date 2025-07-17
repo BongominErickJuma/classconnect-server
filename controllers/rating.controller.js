@@ -28,12 +28,13 @@ exports.createRating = catchAsync(async (req, res, next) => {
 
 exports.updateRating = catchAsync(async (req, res, next) => {
   const { rating, review } = req.body;
+
   const query = {
     text: `UPDATE ratings
             SET 
                 rating = COALESCE($1, rating),
                 review = COALESCE($2, review)
-            WHERE course_id = $3
+            WHERE rating_id = $3
             RETURNING *
     `,
     values: [rating, review, req.params.id],

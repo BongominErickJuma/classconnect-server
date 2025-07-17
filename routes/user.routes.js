@@ -20,6 +20,7 @@ router.use(authController.protect);
 
 router.use('/grades', gradeRouter);
 router.use('/:submission_id/grades', gradeRouter);
+
 // USER ROUTES
 
 router.patch('/updatePassword', authController.updatePassword);
