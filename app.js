@@ -8,7 +8,7 @@ const AppError = require('./utils/appError');
 const userRouter = require('./routes/user.routes');
 const courseRouter = require('./routes/course.routes');
 const notificationRouter = require('./routes/notification.routes');
-
+const statiisticsRouter = require('./routes/stats.routes');
 const app = express();
 
 const allowedOrigins = [
@@ -40,6 +40,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/api/v1/ecl/users', userRouter);
 app.use('/api/v1/ecl/courses', courseRouter);
 app.use('/api/v1/ecl/notifications', notificationRouter);
+app.use('/api/v1/ecl/stats', statiisticsRouter);
 
 app.all('/{*any}', (req, res, next) => {
   next(
