@@ -1,8 +1,10 @@
 const multer = require('multer');
 const sharp = require('sharp');
 const validator = require('validator');
-
+const cloudinary = require('../config/cloudinary');
+const streamifier = require('streamifier');
 const db = require('./../config/db');
+
 const catchAsync = require('./../utils/catchAsync');
 const globalController = require('./global.controller');
 const AppError = require('../utils/appError');
@@ -28,19 +30,55 @@ const upload = multer({
 
 exports.uploadProfilePhoto = upload.single('profile_photo');
 
-// image processing with sharp package
 exports.resizeUserPhoto = catchAsync(async (req, res, next) => {
-  if (!req.file) return next();
+  if (!req.file) {
+    console.log('No file uploaded');
+    return next();
+  }
 
-  req.file.filename = `user-${req.user.user_id}-${Date.now()}.jpeg`;
+  try {
+    // Process image with Sharp
+    const buffer = await sharp(req.file.buffer)
+      .resize(500, 500)
+      .toFormat('jpeg')
+      .jpeg({ quality: 90 })
+      .toBuffer();
 
-  await sharp(req.file.buffer)
-    .resize(500, 500)
-    .toFormat('jpeg')
-    .jpeg({ quality: 90 })
-    .toFile(`public/img/users/${req.file.filename}`);
+    // Prepare Cloudinary upload options
+    const publicId = `user-${req.user.user_id}-${Date.now()}`;
+    const uploadOptions = {
+      folder: 'user_photos',
+      public_id: publicId,
+      resource_type: 'image',
+    };
 
-  next();
+    // Upload to Cloudinary using Promise-based approach
+    const result = await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        uploadOptions,
+        (error, result) => {
+          if (error) {
+            return reject(
+              new AppError('Failed to upload image to Cloudinary', 500)
+            );
+          }
+          resolve(result);
+        }
+      );
+
+      // Pipe the buffer to the upload stream
+      streamifier.createReadStream(buffer).pipe(uploadStream);
+    });
+
+    // Save the Cloudinary URL for downstream use
+    req.file.filename = result.secure_url;
+    req.file.public_id = result.public_id; // Save public_id for potential future deletion
+
+    next();
+  } catch (err) {
+    console.error('Error in resizeUserPhoto:', err);
+    return next(new AppError('Image processing failed', 500));
+  }
 });
 
 exports.getAllUsers = globalController.getAll('users', {
@@ -204,8 +242,10 @@ exports.updateMe = catchAsync(async (req, res, next) => {
   const filteredBody = filterObj(req.body, 'name', 'email');
 
   // 3. Handle profile photo upload if exists
+
+  console.log(req.file);
   if (req.file) {
-    filteredBody.profile_photo = `/img/users/${req.file.filename}`;
+    filteredBody.profile_photo = req.file.filename; // already contains Cloudinary URL
   }
 
   // 4. Update user document
