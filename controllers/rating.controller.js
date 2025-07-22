@@ -14,13 +14,13 @@ exports.getCourseRatings = catchAsync(async (req, res, next) => {
       SELECT 
       r.rating,
       r.review,
-      r.rated_at,   
+      r.created_at,   
       u.name,
       u.profile_photo 
       FROM ratings r
       JOIN users u ON r.student_id = u.user_id
       WHERE r.course_id = $1
-      ORDER BY r.rated_at DESC
+      ORDER BY r.created_at DESC
       LIMIT 10
     `,
     values: [req.params.course_id],
