@@ -8,6 +8,32 @@ exports.getRating = globalController.getOne('rating');
 exports.trashRating = globalController.trashOne('rating');
 exports.deleteRating = globalController.deleteOne('rating');
 
+exports.getCourseRatings = catchAsync(async (req, res, next) => {
+  const query = {
+    text: `
+      SELECT 
+      r.rating,
+      r.review,
+      r.rated_at,   
+      u.name,
+      u.profile_photo 
+      FROM ratings r
+      JOIN users u ON r.student_id = u.user_id
+      WHERE r.course_id = $1
+      ORDER BY r.rated_at DESC
+      LIMIT 10
+    `,
+    values: [req.params.course_id],
+  };
+  const results = await db.query(query);
+  const courseRatings = results.rows;
+
+  res.status(201).json({
+    status: 'success',
+    data: courseRatings,
+  });
+});
+
 exports.createRating = catchAsync(async (req, res, next) => {
   const { student_id, rating, review } = req.body;
 
