@@ -66,7 +66,7 @@ exports.login = catchAsync(async (req, res, next) => {
 
   // 2. Get user from database (including password and verification status)
   const query = {
-    text: `SELECT user_id, name, email, role, profile_photo, password, email_verified 
+    text: `SELECT user_id, name, email, role, profile_photo, password 
            FROM users 
            WHERE email = $1 AND is_deleted = FALSE`,
     values: [email],
