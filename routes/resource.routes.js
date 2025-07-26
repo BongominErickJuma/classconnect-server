@@ -6,7 +6,7 @@ const router = express.Router({ mergeParams: true });
 
 router.delete(
   '/delete-permanently/:id',
-  authController.restrictTo('admin'),
+  authController.restrictTo('admin', 'instructor'),
   resourceController.deleteResource
 );
 

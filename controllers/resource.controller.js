@@ -1,51 +1,123 @@
 const multer = require('multer');
+const streamifier = require('streamifier');
 const path = require('path');
 
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('../utils/appError');
 const db = require('../config/db');
+const cloudinary = require('../config/cloudinary');
 const globalController = require('./global.controller');
 
+// ================================
+// Basic GET/DELETE Controllers
+// ================================
 exports.getAllResources = globalController.getAll('resources');
 exports.getResurce = globalController.getOne('resource');
 exports.trashResource = globalController.trashOne('resource');
 exports.deleteResource = globalController.deleteOne('resource');
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, `public/assets`);
-  },
-  filename: function (req, file, cb) {
-    const ext = file.mimetype.split('/')[1];
-    cb(null, `res-${req.params.course_id}-${Date.now()}.${ext}`);
-  },
-});
+// ================================
+// Multer setup (memory storage)
+// ================================
+const storage = multer.memoryStorage();
 
-// File filter to allow only specific file types
 const fileFilter = (req, file, cb) => {
   const allowedTypes = [
     'application/pdf',
-    'video/mp4',
-    'video/mpeg',
-    'application/msword', // .doc
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.ms-powerpoint',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    'text/plain',
   ];
 
   if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error('Unsupported file type'), false);
+    cb(new AppError('Unsupported file type', 400), false);
   }
 };
 
-const upload = multer({ storage, fileFilter });
+exports.uploadResource = multer({
+  storage,
+  fileFilter,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+}).single('file_url');
 
-exports.uploadResource = upload.single('file_url');
+// ================================
+// Helpers
+// ================================
+const getContentType = (filename) => {
+  const ext = path.extname(filename).toLowerCase();
+  switch (ext) {
+    case '.pdf':
+      return 'application/pdf';
+    case '.doc':
+      return 'application/msword';
+    case '.docx':
+      return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+    case '.ppt':
+      return 'application/vnd.ms-powerpoint';
+    case '.pptx':
+      return 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+    case '.txt':
+      return 'text/plain';
+    default:
+      return 'application/octet-stream';
+  }
+};
 
+const uploadToCloudinary = (buffer, originalname, publicId) => {
+  const contentType = getContentType(originalname);
+
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder: 'resources',
+        public_id: publicId,
+        resource_type: 'auto',
+        content_type: contentType,
+        content_disposition: 'inline',
+        context: `filename=${originalname}`,
+      },
+      (error, result) => {
+        if (error) return reject(new AppError('File upload failed', 500));
+        resolve(result);
+      }
+    );
+
+    streamifier.createReadStream(buffer).pipe(stream);
+  });
+};
+
+const extractPublicId = (url) => {
+  const parts = url.split('/');
+  const filename = parts[parts.length - 1];
+  return filename.substring(0, filename.lastIndexOf('.'));
+};
+
+// ================================
+// Create Resource
+// ================================
 exports.createResource = catchAsync(async (req, res, next) => {
   const { title, type, link } = req.body;
+  let file_url = null;
+  // Optional: let cloudinary_id = null;
 
-  const file_url = req.file ? `/assets/${req.file.filename}` : '';
+  if (req.file) {
+    const publicId = `res-${req.params.course_id}-${Date.now()}`;
+    const result = await uploadToCloudinary(
+      req.file.buffer,
+      req.file.originalname,
+      publicId
+    );
+    file_url = result.secure_url;
+    // Optional: cloudinary_id = result.public_id;
+  }
+
+  if (!file_url && !link) {
+    return next(new AppError('Either a file or link must be provided', 400));
+  }
 
   const query = {
     text: `INSERT INTO resources (course_id, title, type, file_url, link)
@@ -54,41 +126,107 @@ exports.createResource = catchAsync(async (req, res, next) => {
   };
 
   const results = await db.query(query);
-  const resource = results.rows[0];
 
   res.status(201).json({
     status: 'success',
-    data: resource,
+    data: results.rows[0],
   });
 });
 
+// ================================
+// Update Resource
+// ================================
 exports.updateResource = catchAsync(async (req, res, next) => {
   const { title, type, link } = req.body;
+  let file_url = null;
 
-  // Handle either file upload or link (or none)
-  const file_url = req.file ? `/assets/${req.file.filename}` : null;
+  const currentResource = await db.query(
+    'SELECT * FROM resources WHERE resource_id = $1',
+    [req.params.id]
+  );
+
+  if (!currentResource.rows[0]) {
+    return next(new AppError('Resource not found', 404));
+  }
+
+  if (req.file) {
+    const publicId = `res-${req.params.course_id}-${Date.now()}`;
+    const result = await uploadToCloudinary(
+      req.file.buffer,
+      req.file.originalname,
+      publicId
+    );
+    file_url = result.secure_url;
+
+    if (currentResource.rows[0].file_url) {
+      try {
+        const oldPublicId = extractPublicId(currentResource.rows[0].file_url);
+        await cloudinary.uploader.destroy(`resources/${oldPublicId}`, {
+          resource_type: 'raw',
+        });
+      } catch (err) {
+        console.error('Error deleting old file from Cloudinary:', err);
+      }
+    }
+  }
 
   const query = {
     text: `UPDATE resources
            SET 
-               title = COALESCE($1, title),
-               type = COALESCE($2, type),
-               file_url = COALESCE($3, file_url),
-               link = COALESCE($4, link)
+             title = COALESCE($1, title),
+             type = COALESCE($2, type),
+             file_url = CASE WHEN $3::text IS NULL THEN file_url ELSE $3 END,
+             link = COALESCE($4, link)
            WHERE resource_id = $5
            RETURNING *`,
     values: [title, type, file_url, link, req.params.id],
   };
 
   const results = await db.query(query);
-  const resource = results.rows[0];
+  const updated = results.rows[0];
 
-  if (!resource) {
+  if (!updated) {
     return next(new AppError('Resource not found', 404));
   }
 
   res.status(200).json({
     status: 'success',
-    data: resource,
+    data: updated,
+  });
+});
+
+// ================================
+// Delete Resource (with Cloudinary cleanup)
+// ================================
+exports.deleteResource = catchAsync(async (req, res, next) => {
+  const result = await db.query(
+    'SELECT * FROM resources WHERE resource_id = $1',
+    [req.params.id]
+  );
+
+  if (!result.rows[0]) {
+    return next(new AppError('Resource not found', 404));
+  }
+
+  const resource = result.rows[0];
+
+  if (resource.file_url) {
+    try {
+      const publicId = extractPublicId(resource.file_url);
+      await cloudinary.uploader.destroy(`resources/${publicId}`, {
+        resource_type: 'raw',
+      });
+    } catch (err) {
+      console.error('Error deleting file from Cloudinary:', err);
+    }
+  }
+
+  await db.query('DELETE FROM resources WHERE resource_id = $1', [
+    req.params.id,
+  ]);
+
+  res.status(204).json({
+    status: 'success',
+    data: null,
   });
 });

@@ -66,7 +66,7 @@ exports.login = catchAsync(async (req, res, next) => {
 
   // 2. Get user from database (including password and verification status)
   const query = {
-    text: `SELECT user_id, name, email, role, profile_photo, password, email_verified 
+    text: `SELECT user_id, name, email, role, profile_photo, password 
            FROM users 
            WHERE email = $1 AND is_deleted = FALSE`,
     values: [email],
@@ -78,16 +78,6 @@ exports.login = catchAsync(async (req, res, next) => {
   // 3. Check if user exists and password is correct
   if (!user || !(await bcrypt.compare(password, user.password))) {
     return next(new AppError('Incorrect email or password', 401));
-  }
-
-  // 4. Check if email is verified
-  if (!user.email_verified) {
-    return next(
-      new AppError(
-        'Please verify your email first. Check your inbox for the verification link.',
-        401
-      )
-    );
   }
 
   // Remove password from the user object
