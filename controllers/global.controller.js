@@ -5,9 +5,9 @@ const PostgresAPIFeatures = require('../utils/postgresAPIFeatures');
 
 exports.getAll = (model, options = {}) =>
   catchAsync(async (req, res, next) => {
-    const features = new PostgresAPIFeatures(req.query);
+    const features = new PostgresAPIFeatures(req.query, options.allowedColumns);
 
-    if (options.fields && !req.query.fields) {
+    if (options.fields) {
       // Use default fields if none passed by query
       features.fields = options.fields.join(', ');
     }
@@ -19,7 +19,7 @@ exports.getAll = (model, options = {}) =>
     res.status(200).json({
       status: 'success',
       result: results.rowCount,
-      data: results.rows,
+      data: options.mapRow ? results.rows.map(options.mapRow) : results.rows,
     });
   });
 
@@ -38,7 +38,7 @@ exports.getOne = (model, options = {}) =>
 
     res.status(200).json({
       status: 'success',
-      data: output,
+      data: options.mapRow ? options.mapRow(output) : output,
     });
   });
 

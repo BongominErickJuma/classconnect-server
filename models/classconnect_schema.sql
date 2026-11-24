@@ -41,7 +41,7 @@ CREATE TABLE courses (
     description TEXT,
     instructor_id UUID NOT NULL REFERENCES users(user_id),
     cover_image TEXT DEFAULT '/img/courses/default.jpg',
-    rating NUMERIC(4,2) DEFAULT 4.5,
+    rating NUMERIC(4,2),
     is_deleted BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP

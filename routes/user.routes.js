@@ -32,6 +32,7 @@ router.patch(
 );
 router.delete('/deleteMe', userController.deleteMe);
 router.get('/me', userController.getMe);
+router.patch('/me/presence', userController.updatePresence);
 
 router.route('/').get(userController.getAllUsers);
 

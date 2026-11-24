@@ -1,22 +1,34 @@
 const express = require('express');
 const authController = require('../controllers/auth.controller');
 const statsController = require('../controllers/stats.controller');
+const dashboard = require('../controllers/dashboard.controller');
 
 const router = express.Router();
 
 router.use(authController.protect);
 
+router.get('/dashboard/header', dashboard.getHeaderCounts);
+
+const dashboardRoles = authController.restrictTo('instructor', 'admin');
+const studentOnly = authController.restrictTo('student');
+router.get('/dashboard/filters', authController.restrictTo('student', 'instructor', 'admin'), dashboard.getFilters);
+router.get('/dashboard/grading', dashboardRoles, dashboard.getGrading);
+router.get('/dashboard/activity', dashboardRoles, dashboard.getActivity);
+router.get('/dashboard/enrollment-members', dashboardRoles, dashboard.getEnrollmentMembers);
+
 // recent grades & recent reviews
-router.get('/student-recent-grades', statsController.getStudentRecentGrades);
+router.get('/student-recent-grades', studentOnly, dashboard.getStudentGrades);
 router.get(
   '/instructor-recent-reviews',
-  statsController.getInstructorRecentReviews
+  dashboardRoles,
+  dashboard.getReviews
 );
 
 // Recent activities
 router.get(
   '/student-recent-activities',
-  statsController.getStudentRecentActivities
+  studentOnly,
+  dashboard.getStudentActivity
 );
 router.get(
   '/instructor-recent-activities',
@@ -27,7 +39,8 @@ router.get(
 
 router.get(
   '/student-upcoming-deadlines',
-  statsController.getStudentUpcomingDeadlines
+  studentOnly,
+  dashboard.getStudentDeadlines
 );
 router.get(
   '/instructor-upcoming-deadlines',

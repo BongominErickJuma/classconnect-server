@@ -1,6 +1,5 @@
 const express = require('express');
 const assignmentController = require('../controllers/assignment.controller');
-const authController = require('../controllers/auth.controller');
 const submissionRouter = require('./submission.routes');
 
 const router = express.Router({ mergeParams: true });
@@ -12,28 +11,19 @@ router.use('/:assignment_id/submissions', submissionRouter);
 
 router.delete(
   '/delete-permanently/:id',
-  authController.restrictTo('admin'),
   assignmentController.deleteAssignment
 );
+router.patch('/:id/restore', assignmentController.restoreAssignment);
 
 router
   .route('/')
   .get(assignmentController.getAllAssignments)
-  .post(
-    authController.restrictTo('admin', 'instructor'),
-    assignmentController.createAssignment
-  );
+  .post(assignmentController.createAssignment);
 
 router
   .route('/:id')
   .get(assignmentController.getAssignment)
-  .patch(
-    authController.restrictTo('admin', 'instructor'),
-    assignmentController.updateAssignment
-  )
-  .delete(
-    authController.restrictTo('admin', 'instructor'),
-    assignmentController.trashAssignment
-  );
+  .patch(assignmentController.updateAssignment)
+  .delete(assignmentController.trashAssignment);
 
 module.exports = router;

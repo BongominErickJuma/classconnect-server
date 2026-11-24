@@ -1,6 +1,7 @@
 class PostgresAPIFeatures {
-  constructor(queryString) {
+  constructor(queryString, allowedColumns) {
     this.queryString = queryString;
+    this.allowedColumns = allowedColumns;
     this.sql = '';
     this.whereClauses = [];
     this.orderBy = '';
@@ -8,6 +9,10 @@ class PostgresAPIFeatures {
     this.limitClause = '';
     this.offsetClause = '';
     this.params = [];
+  }
+
+  isColumn(field) {
+    return /^[a-z_][a-z0-9_]*$/i.test(field) && (!this.allowedColumns || this.allowedColumns.has(field));
   }
 
   filter() {
@@ -18,6 +23,7 @@ class PostgresAPIFeatures {
     let paramIndex = 1;
 
     for (let [key, value] of Object.entries(queryObj)) {
+      if (!this.isColumn(key)) continue;
       if (typeof value === 'object') {
         // Advanced filters: e.g., ?price[gte]=1000
         for (let [op, val] of Object.entries(value)) {
@@ -44,16 +50,17 @@ class PostgresAPIFeatures {
   }
 
   sort() {
-    if (this.queryString.sort) {
+    if (typeof this.queryString.sort === 'string' && this.queryString.sort) {
       const sortFields = this.queryString.sort
         .split(',')
+        .filter((field) => this.isColumn(field.replace(/^-/, '')))
         .map((field) => {
           return field.startsWith('-')
             ? `${field.slice(1)} DESC`
             : `${field} ASC`;
         })
         .join(', ');
-      this.orderBy = `ORDER BY ${sortFields}`;
+      this.orderBy = `ORDER BY ${sortFields || 'created_at DESC'}`;
     } else {
       this.orderBy = `ORDER BY created_at DESC`;
     }

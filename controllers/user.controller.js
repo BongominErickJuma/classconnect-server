@@ -8,6 +8,7 @@ const db = require('./../config/db');
 const catchAsync = require('./../utils/catchAsync');
 const globalController = require('./global.controller');
 const AppError = require('../utils/appError');
+const { recentPresence } = require('../utils/userPresence');
 
 const multerStorage = multer.memoryStorage();
 
@@ -81,8 +82,39 @@ exports.resizeUserPhoto = catchAsync(async (req, res, next) => {
   }
 });
 
-exports.getAllUsers = globalController.getAll('users', {
-  fields: ['user_id', 'name', 'email', 'role', 'profile_photo'],
+const directoryFields = [
+  'user_id', 'name', 'email', 'role', 'profile_photo',
+  `COALESCE(${recentPresence} AND is_deleted IS NOT TRUE, FALSE) AS is_online`,
+  `CASE WHEN role IN ('instructor', 'admin') THEN (
+    SELECT COUNT(*)::int FROM courses c
+    WHERE c.instructor_id = users.user_id AND c.is_deleted IS NOT TRUE
+  ) END AS courses_taught`,
+  `CASE WHEN role IN ('instructor', 'admin') THEN (
+    SELECT json_build_object('average', ROUND(AVG(r.rating), 1), 'count', COUNT(*)::int)
+    FROM course_review_entries r
+    WHERE r.instructor_id = users.user_id AND r.is_hidden IS FALSE AND r.rating IS NOT NULL
+  ) END AS course_ratings`,
+];
+const listUsers = globalController.getAll('users', { fields: directoryFields });
+const listUsersWithEnrollments = globalController.getAll('users', {
+  fields: [...directoryFields, `CASE WHEN role = 'student' THEN (
+    SELECT COUNT(*)::int FROM enrollments e
+    JOIN courses c ON c.course_id = e.course_id AND c.is_deleted IS NOT TRUE
+    WHERE e.student_id = users.user_id
+  ) END AS enrolled_courses`],
+});
+
+exports.getAllUsers = (req, res, next) => {
+  const list = ['admin', 'instructor'].includes(req.user.role) ? listUsersWithEnrollments : listUsers;
+  return list(req, res, next);
+};
+
+exports.updatePresence = catchAsync(async (req, res) => {
+  await db.query(
+    'UPDATE users SET last_seen_at = CURRENT_TIMESTAMP WHERE user_id = $1 AND is_deleted IS NOT TRUE',
+    [req.user.user_id],
+  );
+  res.status(204).end();
 });
 
 // GET MY DETAILS

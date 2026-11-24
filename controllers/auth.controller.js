@@ -79,7 +79,6 @@ exports.login = catchAsync(async (req, res, next) => {
   if (!user || !(await bcrypt.compare(password, user.password))) {
     return next(new AppError('Incorrect email or password', 401));
   }
-
   // Remove password from the user object
   user.password = undefined;
 
@@ -153,7 +152,7 @@ exports.restrictTo = (...roles) => {
     // roles ['admin', 'lead-guide']. role='user'
     if (!roles.includes(req.user.role)) {
       return next(
-        new AppError('You do not have permission to perform this action', 403)
+        new AppError('You do not have permission to perform this action', 403),
       );
     }
     next();

@@ -1,6 +1,8 @@
 const env = require('dotenv');
 env.config({ path: './config.env' });
 const app = require('./app');
+const db = require('./config/db');
+const { startSubmissionCleanup } = require('./utils/submissionCloudStorage');
 
 if (process.env.NODE_ENV === 'production') {
   const initializeDatabase = require('./models/initializeDatabase');
@@ -15,15 +17,17 @@ if (process.env.NODE_ENV === 'production') {
     }
     const PORT = process.env.PORT || 8000;
     app.listen(PORT, () => {
+      startSubmissionCleanup(db);
       console.log(
-        `🚀 Server running on port ${PORT} [${process.env.NODE_ENV}]`
+        `🚀 Server running on port ${PORT} [${process.env.NODE_ENV}]`,
       );
     });
   }
   startServer();
 } else {
-  const PORT = process.env.PORT || 8000;
+  const PORT = process.env.PORT;
   app.listen(PORT, () => {
+    startSubmissionCleanup(db);
     console.log(`🚀 Server running on port ${PORT} [${process.env.NODE_ENV}]`);
   });
 }

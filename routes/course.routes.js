@@ -5,6 +5,7 @@ const assignmentRouter = require('./assignment.routes');
 const resourceRouter = require('./resource.routes');
 const ratingsRouter = require('./rating.routes');
 const enrolmentsRouter = require('./enrollment.routes');
+const chapterController = require('../controllers/chapter.controller');
 
 const router = express.Router();
 
@@ -30,6 +31,16 @@ router.use('/:course_id/ratings', ratingsRouter);
 router.use('/enrollments', enrolmentsRouter);
 router.use('/:course_id/enrollments', enrolmentsRouter);
 
+router.get('/:course_id/videos', chapterController.getVideos);
+router.post('/:course_id/chapters', chapterController.createChapter);
+router.patch('/:course_id/chapters/:chapter_id', chapterController.renameChapter);
+router.delete('/:course_id/chapters/:chapter_id', chapterController.deleteChapter);
+router.post('/:course_id/chapters/:chapter_id/videos', chapterController.addVideo);
+router.patch('/:course_id/videos/:resource_id/chapter', chapterController.moveVideo);
+router.patch('/:course_id/videos/:resource_id/removal', chapterController.setVideoRemoved);
+router.patch('/:course_id/videos/:resource_id/progress', chapterController.saveVideoProgress);
+router.delete('/:course_id/videos/:resource_id', chapterController.deleteRemovedVideo);
+
 // COURSE ROUTES
 
 router.delete(
@@ -41,6 +52,13 @@ router.delete(
 router.get(
   '/enrolled-courses/:ids',
   courseController.getStudentEnrolledCourses
+);
+
+router.get(
+  '/:id/eligible-instructors',
+  authController.restrictTo('admin', 'instructor'),
+  courseController.requireCourseManager,
+  courseController.getEligibleInstructors
 );
 
 router
@@ -56,12 +74,14 @@ router
   .get(courseController.getCourse)
   .patch(
     authController.restrictTo('admin', 'instructor'),
+    courseController.requireCourseManager,
     courseController.uploadCourseCover,
     courseController.resizeCoverImage,
     courseController.updateCourse
   )
   .delete(
     authController.restrictTo('admin', 'instructor'),
+    courseController.requireCourseManager,
     courseController.trashCourse
   );
 

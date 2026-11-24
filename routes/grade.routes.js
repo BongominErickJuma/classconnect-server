@@ -1,29 +1,9 @@
 const express = require('express');
-const gradesController = require('../controllers/grade.controller');
-const authController = require('../controllers/auth.controller');
-
+const grade = require('../controllers/grade.controller');
 const router = express.Router({ mergeParams: true });
 
-router.use(
-  '/delete-permanently/:id',
-  authController.restrictTo('admin', 'instructer'),
-  gradesController.deleteGrade
-);
-
-router
-  .route('/')
-  .get(gradesController.getAllGrades)
-  .post(
-    authController.restrictTo('instructor', 'admin'),
-    gradesController.createGrade
-  );
-
-router
-  .route('/:id')
-  .get(gradesController.getGrade)
-  .patch(
-    authController.restrictTo('instructor', 'admin'),
-    gradesController.updateGrade
-  );
+router.delete('/delete-permanently/:id', grade.deleteGrade);
+router.route('/').get(grade.getAllGrades).post(grade.createGrade).put(grade.saveGrade);
+router.route('/:id').get(grade.getGrade).patch(grade.updateGrade);
 
 module.exports = router;

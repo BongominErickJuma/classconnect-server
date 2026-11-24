@@ -1,4 +1,5 @@
 const db = require('./../config/db');
+const migrateCourseChapters = require('./migrateCourseChapters');
 
 async function initializeDatabase() {
   try {
@@ -34,7 +35,7 @@ async function initializeDatabase() {
         description TEXT,
         instructor_id UUID NOT NULL REFERENCES users(user_id),
         cover_image TEXT DEFAULT '/img/courses/default.jpg',
-        rating NUMERIC(4,2) DEFAULT 4.5,
+        rating NUMERIC(4,2),
         is_deleted BOOLEAN DEFAULT FALSE,
         created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
@@ -137,9 +138,11 @@ async function initializeDatabase() {
       );
     `);
 
+    await migrateCourseChapters(db);
     console.log('✅ All tables checked and created if missing.');
   } catch (error) {
     console.error('❌ Error initializing database schema:', error);
+    throw error;
   }
 }
 

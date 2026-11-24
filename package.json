@@ -4,6 +4,8 @@
   "description": "the APIs for powering eClasslink platform",
   "main": "server.js",
   "scripts": {
+    "db:migrate:chapters": "node models/migrateCourseChapters.js",
+    "db:migrate:submission-files": "node models/migrateSubmissionFiles.js",
     "start": "nodemon server.js",
     "start:prod": "cross-env NODE_ENV=production nodemon server.js"
   },

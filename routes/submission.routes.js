@@ -1,29 +1,14 @@
 const express = require('express');
-const submissionController = require('../controllers/submission.controller');
-const authController = require('../controllers/auth.controller');
-
+const submission = require('../controllers/submission.controller');
 const router = express.Router({ mergeParams: true });
 
-router.use(
-  '/delete-permanently/:id',
-  authController.restrictTo('admin'),
-  submissionController.deleteSubmission
-);
-
-router
-  .route('/')
-  .get(submissionController.getAllSubmissions)
-  .post(
-    authController.restrictTo('student'),
-    submissionController.createSubmission
-  );
-
-router
-  .route('/:id')
-  .get(submissionController.getSubmission)
-  .delete(
-    authController.restrictTo('admin', 'instructor'),
-    submissionController.trashSubmission
-  );
+router.delete('/delete-permanently/:id', submission.deleteSubmission);
+router.get('/:id/file', submission.downloadSubmission);
+router.patch('/:id/restore', submission.restoreSubmission);
+router.route('/')
+  .get(submission.getAllSubmissions)
+  .post(submission.requireSubmissionAccess, submission.uploadSubmission, submission.createSubmission)
+  .put(submission.requireSubmissionAccess, submission.uploadSubmission, submission.replaceSubmission);
+router.route('/:id').get(submission.getSubmission).delete(submission.trashSubmission);
 
 module.exports = router;
